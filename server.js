@@ -18,7 +18,6 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
 
-
     // 📌 Route: Home Page - Display Books
 app.get("/", async (req, res) => {
     const books = await Book.find();
@@ -48,10 +47,29 @@ app.post("/add", async (req, res) => {
 
 // 📌 Route: Issue Book
 app.post("/issue", async (req, res) => {
-    const { bookName } = req.body;
-    await Book.findOneAndUpdate({ bookName, bookState: "Available" }, { bookState: "Issued" });
+    const { bookName, customerName, customerPhone, customerEmail, customerAddress } = req.body;
+    
+    await Book.findOneAndUpdate(
+        { bookName, bookState: "Available" },
+        { 
+            bookState: "Issued", 
+            borrower: {
+                name: customerName,
+                phone: customerPhone,
+                email: customerEmail,
+                address: customerAddress
+            }
+        }
+    );
+    
     res.redirect("/");
 });
+
+// app.post("/issue", async (req, res) => {
+//     const { bookName } = req.body;
+//     await Book.findOneAndUpdate({ bookName, bookState: "Available" }, { bookState: "Issued" });
+//     res.redirect("/");
+// });
 
 // 📌 Route: Return Book
 app.post("/return", async (req, res) => {
